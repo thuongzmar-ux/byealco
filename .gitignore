@@ -1,0 +1,9 @@
+# Bỏ qua file Excel (dữ liệu nhạy cảm - thông tin khách hàng)
+*.xlsx
+*.xls
+*.csv
+*.pdf
+
+# Hệ thống
+.DS_Store
+__pycache__/

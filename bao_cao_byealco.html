@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BYEALCO — Báo Cáo Doanh Thu 07/04/2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 32px 24px 48px;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .header .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 18px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 900;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+    .header p { margin-top: 8px; font-size: 13px; color: #94a3b8; letter-spacing: 0.5px; }
+
+    /* ── KPI CARDS ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px 20px 18px;
+      box-shadow: 0 2px 16px rgba(99,102,241,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      border: 1px solid #e8edf5;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(99,102,241,0.14); }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      border-radius: 18px 18px 0 0;
+    }
+    .kpi-card.indigo::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .kpi-card.violet::before { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+    .kpi-card.emerald::before{ background: linear-gradient(90deg, #059669, #34d399); }
+    .kpi-card.red::before    { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .kpi-card.amber::before  { background: linear-gradient(90deg, #d97706, #fbbf24); }
+    .kpi-card.sky::before    { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+
+    .kpi-icon { font-size: 26px; margin-bottom: 10px; }
+    .kpi-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 6px; }
+    .kpi-value { font-size: clamp(17px, 2.2vw, 24px); font-weight: 800; color: #1e293b; }
+    .kpi-sub { font-size: 12px; color: #94a3b8; margin-top: 5px; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    @media(max-width:900px) { .grid-2,.grid-3 { grid-template-columns: 1fr; } }
+
+    /* ── CHART CARD ── */
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 2px 16px rgba(99,102,241,0.07), 0 1px 3px rgba(0,0,0,0.04);
+      border: 1px solid #e8edf5;
+      transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); }
+    .card.full { grid-column: 1 / -1; }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .pip {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      flex-shrink: 0;
+    }
+    .chart-wrap { position: relative; }
+    .donut-wrap { max-width: 280px; margin: 0 auto; }
+
+    /* ── LEGEND ── */
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; justify-content: center; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #475569; font-weight: 500; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── TABLE ── */
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th {
+      text-align: left; padding: 10px 14px;
+      color: #94a3b8; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      border-bottom: 2px solid #f1f5f9;
+      background: #f8fafc;
+    }
+    .tbl th:not(:first-child) { text-align: right; }
+    .tbl td { padding: 13px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .tbl td:not(:first-child) { text-align: right; }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:hover td { background: #f8faff; }
+    .tbl tfoot td { background: #f8fafc; font-weight: 800; border-top: 2px solid #e2e8f0; }
+
+    /* badges */
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; }
+    .b-indigo { background: #eef2ff; color: #4f46e5; }
+    .b-emerald { background: #ecfdf5; color: #059669; }
+    .b-amber  { background: #fffbeb; color: #d97706; }
+    .b-red    { background: #fef2f2; color: #dc2626; }
+    .b-sky    { background: #f0f9ff; color: #0284c7; }
+
+    /* progress bar */
+    .bar-bg  { height: 6px; background: #f1f5f9; border-radius: 99px; margin-top: 6px; width: 100%; }
+    .bar-fill{ height: 6px; border-radius: 99px; }
+    .bf-1 { background: linear-gradient(90deg,#6366f1,#8b5cf6); }
+    .bf-2 { background: linear-gradient(90deg,#059669,#34d399); }
+    .bf-3 { background: linear-gradient(90deg,#d97706,#fbbf24); }
+    .bf-4 { background: linear-gradient(90deg,#dc2626,#f87171); }
+
+    /* status rows */
+    .status-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; }
+    .status-item {
+      background: #f8fafc;
+      border: 1px solid #e8edf5;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .status-item .s-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .status-item .s-val { font-size: 20px; font-weight: 800; color: #1e293b; }
+    .status-item .s-pct { font-size: 12px; color: #64748b; margin-top: 3px; }
+    .status-item .s-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+    .footer { text-align: center; color: #cbd5e1; font-size: 11px; margin-top: 36px; letter-spacing: 0.5px; }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+      border: 1px solid #c7d2fe;
+      border-radius: 14px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: center;
+      justify-content: space-around;
+    }
+    .highlight-box .h-item { text-align: center; }
+    .highlight-box .h-label { font-size: 11px; color: #6366f1; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .highlight-box .h-val { font-size: 22px; font-weight: 900; color: #3730a3; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="badge">📊 Báo Cáo Đơn Hàng</div>
+  <h1>BYEALCO Sales Dashboard</h1>
+  <p>Kỳ báo cáo: 15/03/2026 → 07/04/2026 &nbsp;|&nbsp; Xuất: 07/04/2026 14:58</p>
+</div>
+
+<!-- HIGHLIGHT -->
+<div class="highlight-box">
+  <div class="h-item">
+    <div class="h-label">Tổng đơn</div>
+    <div class="h-val">407</div>
+  </div>
+  <div class="h-item">
+    <div class="h-label">GMV</div>
+    <div class="h-val">70,285,025 đ</div>
+  </div>
+  <div class="h-item">
+    <div class="h-label">NMV (Thực thu)</div>
+    <div class="h-val">65,635,372 đ</div>
+  </div>
+  <div class="h-item">
+    <div class="h-label">Tổng hoàn tiền</div>
+    <div class="h-val">4,461,553 đ</div>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+  <div class="kpi-card emerald">
+    <div class="kpi-icon">✅</div>
+    <div class="kpi-label">Đơn Sạch (Active)</div>
+    <div class="kpi-value">375 đơn</div>
+    <div class="kpi-sub">92.1% tổng đơn · 65,635,372 đ</div>
+  </div>
+  <div class="kpi-card red">
+    <div class="kpi-icon">🚚</div>
+    <div class="kpi-label">Giao Thất Bại</div>
+    <div class="kpi-value">6 đơn</div>
+    <div class="kpi-sub">1.5% tổng đơn · 843,945 đ</div>
+  </div>
+  <div class="kpi-card amber">
+    <div class="kpi-icon">😑</div>
+    <div class="kpi-label">Khách Huỷ Chủ Động</div>
+    <div class="kpi-value">23 đơn</div>
+    <div class="kpi-sub">5.7% tổng đơn · 3,416,032 đ</div>
+  </div>
+  <div class="kpi-card sky">
+    <div class="kpi-icon">⚙️</div>
+    <div class="kpi-label">Hệ Thống Huỷ Khác</div>
+    <div class="kpi-value">2 đơn</div>
+    <div class="kpi-sub">0.5% tổng đơn · 135,268 đ</div>
+  </div>
+  <div class="kpi-card violet">
+    <div class="kpi-icon">🔄</div>
+    <div class="kpi-label">Hoàn Hàng</div>
+    <div class="kpi-value">1 đơn</div>
+    <div class="kpi-sub">0.2% tổng đơn · 254,408 đ</div>
+  </div>
+</div>
+
+<!-- CHARTS ROW 1 -->
+<div class="section-title">Biểu đồ phân tích</div>
+<div class="grid-2">
+
+  <div class="card">
+    <div class="card-title"><span class="pip"></span>Phân Loại Đơn Hàng (407 đơn)</div>
+    <div class="chart-wrap donut-wrap" style="height:240px;">
+      <canvas id="donutOrders"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#059669"></div>Sạch (375)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Giao thất bại (6)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>Khách huỷ (23)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0284c7"></div>System huỷ (2)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Hoàn (1)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="pip"></span>Phân Bổ GMV (70,285,025 đ)</div>
+    <div class="chart-wrap donut-wrap" style="height:240px;">
+      <canvas id="donutGMV"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#059669"></div>NMV (65.6M)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Giao thất bại (0.84M)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>Khách huỷ (3.4M)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0284c7"></div>System huỷ (0.14M)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Hoàn (0.25M)</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SKU SECTION -->
+<div class="section-title">Doanh thu theo SKU</div>
+
+<div class="card" style="margin-bottom:18px;">
+  <div class="card-title"><span class="pip"></span>Doanh Thu SKU (375 đơn sạch · NMV = 65,635,372 đ)</div>
+  <div class="chart-wrap" style="height:220px;">
+    <canvas id="barSKU"></canvas>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><span class="pip"></span>Tỷ Lệ Doanh Thu SKU</div>
+    <div class="chart-wrap donut-wrap" style="height:220px;">
+      <canvas id="donutSKU"></canvas>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>BYEA1L1N 72.6%</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#059669"></div>BYEA1N 16.6%</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div>BYEA2N 10.0%</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>BYEA2L3N 0.8%</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="pip"></span>Số Lượng Bán Theo SKU</div>
+    <div class="chart-wrap" style="height:220px;">
+      <canvas id="barQty"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- SKU TABLE -->
+<div class="card" style="margin-bottom:18px;">
+  <div class="card-title"><span class="pip"></span>Bảng Chi Tiết SKU</div>
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>SKU</th>
+        <th>Sản phẩm</th>
+        <th>SL bán</th>
+        <th>Doanh thu</th>
+        <th>% trong SKU</th>
+        <th>% NMV</th>
+        <th>Phân bổ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge b-indigo">BYEA1L1N</span></td>
+        <td>
+          <div style="font-weight:700;">[Mua 1 Tặng 1] BYEALCO</div>
+          <div style="font-size:12px;color:#94a3b8;">Hỗ trợ tăng cường chức năng gan</div>
+        </td>
+        <td><strong>186</strong></td>
+        <td><strong style="color:#4f46e5;">46,570,171 đ</strong></td>
+        <td><strong>72.6%</strong></td>
+        <td>71.0%</td>
+        <td style="min-width:100px;"><div class="bar-bg"><div class="bar-fill bf-1" style="width:72.6%"></div></div></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-emerald">BYEA1N</span></td>
+        <td>
+          <div style="font-weight:700;">[Dùng thử 5 viên] — 1 hộp</div>
+          <div style="font-size:12px;color:#94a3b8;">Hỗ trợ hồi phục sau uống bia rượu</div>
+        </td>
+        <td><strong>159</strong></td>
+        <td><strong style="color:#059669;">10,653,098 đ</strong></td>
+        <td>16.6%</td>
+        <td>16.2%</td>
+        <td><div class="bar-bg"><div class="bar-fill bf-2" style="width:16.6%"></div></div></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-amber">BYEA2N</span></td>
+        <td>
+          <div style="font-weight:700;">[Dùng thử 5 viên] — 2 hộp</div>
+          <div style="font-size:12px;color:#94a3b8;">Hỗ trợ hồi phục sau uống bia rượu</div>
+        </td>
+        <td><strong>48</strong></td>
+        <td><strong style="color:#d97706;">6,443,158 đ</strong></td>
+        <td>10.0%</td>
+        <td>9.8%</td>
+        <td><div class="bar-bg"><div class="bar-fill bf-3" style="width:10%"></div></div></td>
+      </tr>
+      <tr>
+        <td><span class="badge b-red">BYEA2L3N</span></td>
+        <td>
+          <div style="font-weight:700;">[Mua 2 Tặng 3] BYEALCO</div>
+          <div style="font-size:12px;color:#94a3b8;">Hỗ trợ bảo vệ gan, giảm tác hại rượu bia</div>
+        </td>
+        <td><strong>1</strong></td>
+        <td><strong style="color:#dc2626;">488,816 đ</strong></td>
+        <td>0.8%</td>
+        <td>0.7%</td>
+        <td><div class="bar-bg"><div class="bar-fill bf-4" style="width:0.8%"></div></div></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">🔢 TỔNG</td>
+        <td>394 sp</td>
+        <td>64,155,243 đ</td>
+        <td>100%</td>
+        <td>97.7%</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<!-- ĐƠN HUỶ PHÂN TÍCH -->
+<div class="section-title">Phân tích đơn huỷ + hoàn</div>
+<div class="status-grid" style="margin-bottom:18px;">
+  <div class="status-item">
+    <div class="s-label">🚚 Giao thất bại</div>
+    <div class="s-val" style="color:#dc2626;">6 đơn</div>
+    <div class="s-pct">1.5% tổng đơn</div>
+    <div class="s-sub">843,945 đ · refund 784,245 đ</div>
+  </div>
+  <div class="status-item">
+    <div class="s-label">😑 Khách huỷ chủ động</div>
+    <div class="s-val" style="color:#d97706;">23 đơn</div>
+    <div class="s-pct">5.7% tổng đơn</div>
+    <div class="s-sub">3,416,032 đ · refund 3,290,232 đ</div>
+  </div>
+  <div class="status-item">
+    <div class="s-label">⚙️ Hệ thống huỷ</div>
+    <div class="s-val" style="color:#0284c7;">2 đơn</div>
+    <div class="s-pct">0.5% tổng đơn</div>
+    <div class="s-sub">135,268 đ · refund 132,668 đ</div>
+  </div>
+  <div class="status-item">
+    <div class="s-label">🔄 Hoàn hàng</div>
+    <div class="s-val" style="color:#7c3aed;">1 đơn</div>
+    <div class="s-pct">0.2% tổng đơn</div>
+    <div class="s-sub">254,408 đ · hoàn toàn bộ</div>
+  </div>
+  <div class="status-item" style="background:#fef2f2;border-color:#fecaca;">
+    <div class="s-label" style="color:#dc2626;">⚠️ Tổng thất thu</div>
+    <div class="s-val" style="color:#dc2626;">32 đơn</div>
+    <div class="s-pct">7.9% tổng đơn</div>
+    <div class="s-sub">4,649,653 đ · refund 4,461,553 đ</div>
+  </div>
+</div>
+
+<div class="footer">
+  BYEALCO · Báo cáo tự động · Nguồn: TikTok Shop · Kỳ 15/03 – 07/04/2026
+</div>
+
+<script>
+Chart.defaults.color = '#64748b';
+Chart.defaults.font.family = "'Be Vietnam Pro', sans-serif";
+Chart.defaults.font.size = 12;
+
+const centerPlugin = [{
+  id: 'center',
+  beforeDraw(chart) {
+    if (!chart.config.options._center) return;
+    const { ctx, chartArea:{width,height,top} } = chart;
+    const { val, sub } = chart.config.options._center;
+    const cx = width/2, cy = top + height/2;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#1e293b'; ctx.font='bold 18px Be Vietnam Pro';
+    ctx.fillText(val, cx, cy-10);
+    ctx.fillStyle='#94a3b8'; ctx.font='11px Be Vietnam Pro';
+    ctx.fillText(sub, cx, cy+12);
+    ctx.restore();
+  }
+}];
+
+// Donut: Orders
+new Chart(document.getElementById('donutOrders'), {
+  type:'doughnut', plugins: centerPlugin,
+  data:{
+    labels:['Đơn sạch (375)','Giao thất bại (6)','Khách huỷ (23)','System huỷ (2)','Hoàn hàng (1)'],
+    datasets:[{ data:[375,6,23,2,1],
+      backgroundColor:['#059669','#dc2626','#d97706','#0284c7','#7c3aed'],
+      borderColor:'#fff', borderWidth:3, hoverOffset:8 }]
+  },
+  options:{ cutout:'68%', plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>` ${c.label}: ${(c.parsed/407*100).toFixed(1)}%`}}},
+    _center:{val:'407',sub:'Tổng đơn'} }
+});
+
+// Donut: GMV
+new Chart(document.getElementById('donutGMV'), {
+  type:'doughnut', plugins: centerPlugin,
+  data:{
+    labels:['NMV (65.6M)','Giao thất bại (0.84M)','Khách huỷ (3.4M)','System huỷ (0.14M)','Hoàn (0.25M)'],
+    datasets:[{ data:[65635372,843945,3416032,135268,254408],
+      backgroundColor:['#059669','#dc2626','#d97706','#0284c7','#7c3aed'],
+      borderColor:'#fff', borderWidth:3, hoverOffset:8 }]
+  },
+  options:{ cutout:'68%', plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>` ${c.label}: ${(c.parsed/70285025*100).toFixed(1)}%`}}},
+    _center:{val:'70.3M','sub':'GMV'} }
+});
+
+// Bar: SKU Revenue
+new Chart(document.getElementById('barSKU'), {
+  type:'bar',
+  data:{
+    labels:['BYEA1L1N\n[Mua 1 Tặng 1]','BYEA1N\n[Dùng thử 1 hộp]','BYEA2N\n[Dùng thử 2 hộp]','BYEA2L3N\n[Mua 2 Tặng 3]'],
+    datasets:[{ label:'Doanh thu (đ)',
+      data:[46570171,10653098,6443158,488816],
+      backgroundColor:['rgba(99,102,241,0.85)','rgba(5,150,105,0.85)','rgba(217,119,6,0.85)','rgba(220,38,38,0.85)'],
+      borderColor:['#6366f1','#059669','#d97706','#dc2626'],
+      borderWidth:2, borderRadius:10, borderSkipped:false }]
+  },
+  options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>` ${(c.parsed.x/1000000).toFixed(2)}M đ`}}},
+    scales:{
+      x:{grid:{color:'#f1f5f9'}, ticks:{callback:v=>(v/1000000).toFixed(0)+'M'}},
+      y:{grid:{display:false}} } }
+});
+
+// Donut: SKU %
+new Chart(document.getElementById('donutSKU'), {
+  type:'doughnut', plugins: centerPlugin,
+  data:{
+    labels:['BYEA1L1N 72.6%','BYEA1N 16.6%','BYEA2N 10.0%','BYEA2L3N 0.8%'],
+    datasets:[{ data:[46570171,10653098,6443158,488816],
+      backgroundColor:['#6366f1','#059669','#d97706','#dc2626'],
+      borderColor:'#fff', borderWidth:3, hoverOffset:8 }]
+  },
+  options:{ cutout:'65%', plugins:{legend:{display:false},
+    tooltip:{callbacks:{label:c=>` ${c.label}`}}},
+    _center:{val:'64.2M',sub:'Tổng SKU'} }
+});
+
+// Bar: Qty
+new Chart(document.getElementById('barQty'), {
+  type:'bar',
+  data:{
+    labels:['BYEA1L1N','BYEA1N','BYEA2N','BYEA2L3N'],
+    datasets:[{ label:'Số lượng',
+      data:[186,159,48,1],
+      backgroundColor:['rgba(99,102,241,0.85)','rgba(5,150,105,0.85)','rgba(217,119,6,0.85)','rgba(220,38,38,0.85)'],
+      borderRadius:10, borderSkipped:false }]
+  },
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{y:{grid:{color:'#f1f5f9'}}, x:{grid:{display:false}}} }
+});
+</script>
+</body>
+</html>
